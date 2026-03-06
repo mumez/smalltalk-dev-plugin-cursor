@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "./scripts/suggest-class-comment.sh"
+      }
+    ]
+  }
+}
