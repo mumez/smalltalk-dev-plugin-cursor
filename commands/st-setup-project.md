@@ -210,7 +210,7 @@ PROJECT_NAME="$1"
 # Step 1: Get project name if not provided
 if [ -z "$PROJECT_NAME" ]; then
   # Use AskUserQuestion to prompt for project name
-  # (Claude will handle this automatically)
+  # (the assistant will prompt for it if needed)
   exit 1
 fi
 
@@ -332,7 +332,7 @@ echo "  3. Write tests in ${PROJECT_NAME}-Tests"
 
 # Interactive mode
 /st-setup-project
-# (Claude will ask: "What is your project name?")
+# (the assistant will ask: "What is your project name?")
 # User enters: JSONParser
 
 # Invalid name (will fail)
@@ -344,7 +344,7 @@ echo "  3. Write tests in ${PROJECT_NAME}-Tests"
 # Error: Project already exists
 ```
 
-## Notes for Claude
+## Execution notes
 
 When executing this command:
 

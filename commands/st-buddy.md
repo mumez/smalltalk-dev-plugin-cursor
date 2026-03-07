@@ -218,7 +218,7 @@ This command will activate the development workflow and explain how to work effe
 
 3. **Out of Scope Questions**: If asked about non-Smalltalk topics, gently redirect:
    ```
-   "I'm specialized in Smalltalk development workflows. For [other topic], you might want to consult the main Claude Code assistant. However, if you have Smalltalk-related questions, I'm here to help!"
+   "I'm specialized in Smalltalk development workflows. For [other topic], you might want to consult the main Cursor assistant. However, if you have Smalltalk-related questions, I'm here to help!"
    ```
 
 ## Quality Standards

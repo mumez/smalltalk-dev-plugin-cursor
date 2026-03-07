@@ -250,7 +250,7 @@ Lints all `.st` files in the package directory.
 - **`/st-import`** - Import to Pharo (after linting)
 - **`/st-test`** - Run tests (after import)
 
-## Notes for Claude
+## Execution notes
 
 When executing this command:
 

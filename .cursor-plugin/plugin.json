@@ -5,5 +5,8 @@
   "author": {
     "name": "Masashi Umezawa"
   },
-  "repository": "https://github.com/mumez/smalltalk-dev-plugin-cursor"
+  "repository": "https://github.com/mumez/smalltalk-dev-plugin-cursor",
+  "mcpServers": [
+    "./mcp.json"
+  ]
 }

@@ -1,8 +1,8 @@
 # smalltalk-dev Plugin
 
-[Claude Code](https://github.com/anthropics/claude-code) plugin for AI-driven Smalltalk (Pharo) development.
+[Cursor](https://cursor.com/) plugin for AI-driven Smalltalk (Pharo) development.
 
-> Also available for [Cursor, Windsurf, and Antigravity](doc/setup-other-agents.md).
+> [Claude Code version](https://github.com/mumez/smalltalk-dev-plugin) is also available.
 
 ## Overview
 
@@ -60,38 +60,15 @@ For experienced users who prefer direct commands, see [Commands.md](doc/Commands
 
 Install [PharoSmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer) in your Pharo image.
 
-### 2. Claude Code
+### 2. Cursor
 
-Install [Claude Code](https://github.com/anthropics/claude-code).
-
-> **Other AI agents**: If you use Cursor, Windsurf, or Antigravity instead of Claude Code, see [Other AI Agents Setup Guide](doc/setup-other-agents.md).
+Install [Cursor](https://cursor.com/) from the official site.
 
 ## Installation
 
-### Option 1: Install from GitHub (Recommended)
-
 ```bash
-# Add marketplace from GitHub
-claude plugin marketplace add mumez/smalltalk-dev-plugin
-
 # Install the plugin
-claude plugin install smalltalk-dev
-```
-
-### Option 2: Local Development
-
-For local testing and development:
-
-```bash
-# Clone the repository
-git clone https://github.com/mumez/smalltalk-dev-plugin.git
-cd smalltalk-dev-plugin
-
-# Add local directory as marketplace
-claude plugin marketplace add ./
-
-# Install the plugin
-claude plugin install smalltalk-dev
+/add-plugin smalltalk-dev
 ```
 
 ### Verify Installation
@@ -172,39 +149,9 @@ export PHARO_SIS_PORT=8086  # default
 
 ## Uninstallation
 
-### Uninstall Plugin
-
 ```bash
 # Remove the plugin
-claude plugin uninstall smalltalk-dev
-```
-
-### Remove Marketplace (Optional)
-
-If you also want to remove the marketplace entry:
-
-```bash
-claude plugin marketplace remove smalltalk-dev-marketplace
-```
-
-**Note**: The marketplace name depends on how you added it. Use `claude plugin marketplace list` to see the exact name.
-
-### Clean Reinstall (Local Development)
-
-When developing locally and need to test changes:
-
-```bash
-# Uninstall current version
-claude plugin uninstall smalltalk-dev
-
-# Remove marketplace
-claude plugin marketplace remove smalltalk-dev-marketplace
-
-# Re-add marketplace
-claude plugin marketplace add ./
-
-# Reinstall plugin
-claude plugin install smalltalk-dev
+/remove-plugin smalltalk-dev
 ```
 
 ## Best Practices
@@ -281,11 +228,12 @@ SisServer current.  "Should show running server"
 ## Project Structure
 
 ```
-smalltalk-dev-plugin/
-├── .claude-plugin/
-│   ├── plugin.json          # Plugin metadata
-│   └── marketplace.json     # Marketplace configuration
-├── .mcp.json                # MCP server configuration
+smalltalk-dev-plugin-cursor/
+├── .cursor-plugin/
+│   └── plugin.json          # Cursor plugin metadata, MCP server reference
+├── mcp.json                 # MCP server configuration
+├── assets/
+│   └── logo.svg             # Plugin logo
 ├── commands/
 │   ├── st-buddy.md          # /st-buddy - Friendly development assistant
 │   ├── st-init.md           # /st-init - Start development session
@@ -318,31 +266,12 @@ smalltalk-dev-plugin/
 ├── hooks/
 │   └── hooks.json           # PostToolUse hook configuration
 ├── scripts/
-│   └── suggest-class-comment.sh     # PostToolUse hook for documentation suggestions
-├── extra/
-│   ├── setup-cursor.sh              # Setup script for Cursor
-│   ├── setup-windsurf.sh            # Setup script for Windsurf
-│   ├── setup-antigravity.sh         # Setup script for Antigravity
-│   └── suggest-class-comment_cursor.sh # Hook script for Cursor
+│   └── suggest-class-comment.sh  # PostToolUse hook for documentation suggestions
 ├── doc/
-│   ├── Commands.md                  # Commands quick reference
-│   └── setup-other-agents.md       # Setup guide for other AI agents
-├── README.md                # This file
-└── claudedocs/
-    └── test-scenarios.md    # Testing documentation
+│   └── Commands.md               # Commands quick reference
+├── README.md                 # This file
+└── LICENSE
 ```
-
-## Presentation
-
-- [Introducing smalltalk-dev Plugin](https://mumez.github.io/smalltalk-dev-plugin-slides/introducing-smalltalk-dev-plugin-en.html)
-
-## Examples
-
-Projects built with this plugin:
-
-- [smalltalk-dev-plugin-money-example](https://github.com/mumez/smalltalk-dev-plugin-money-example) - Multi-currency Money class with arithmetic operations and exchange rate conversion
-- [smalltalk-dev-plugin-graph-example](https://github.com/mumez/smalltalk-dev-plugin-graph-example) - Directed weighted graph with Dijkstra's shortest-path algorithm
-- [smalltalk-dev-plugin-gui-example](https://github.com/mumez/smalltalk-dev-plugin-gui-example) - Interactive to-do list app built with the Spec2 framework
 
 ## Contributing
 
@@ -351,7 +280,7 @@ Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test with Claude Code
+4. Test with Cursor
 5. Submit a pull request
 
 ## License
@@ -363,5 +292,5 @@ MIT License - see LICENSE file for details
 - **MCP Servers**:
   - [pharo-smalltalk-interop-mcp-server](https://github.com/mumez/pharo-smalltalk-interop-mcp-server) by mumez
   - [smalltalk-validator-mcp-server](https://github.com/mumez/smalltalk-validator-mcp-server) by mumez
-- **Claude Code**: [Anthropic](https://www.anthropic.com/)
+- **Cursor**: [Cursor](https://cursor.com/)
 - **Pharo**: [Pharo Project](https://pharo.org/)
