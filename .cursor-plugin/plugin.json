@@ -2,7 +2,7 @@
   "name": "smalltalk-dev",
   "displayName": "Smalltalk Dev",
   "version": "1.7.1",
-  "description": "Comprehensive Pharo Smalltalk development toolkit for AI-driven development",
+  "description": "Develop Pharo Smalltalk in Cursor with AI assistance: edit Tonel files, import to Pharo, run tests, and debug—all from the editor with slash commands and MCP tools.",
   "author": {
     "name": "Masashi Umezawa"
   },
