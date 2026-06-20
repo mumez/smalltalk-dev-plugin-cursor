@@ -35,14 +35,14 @@ Most Smalltalk projects follow these conventions:
    - `repositories/` (older projects, pre-Tonel format)
    - `pharo-local/iceberg/...` (Iceberg working copies)
 
-2. **Project metadata**: Check `.project` file in project root:
-   **If `.project` does not exist**, create it using Pharo's format (single quotes, tab indentation):
+2. **Project metadata**: Check `.project` file in project root.
+   The `.project` file is **required** for Pharo to locate the source directory.
+   **If `.project` does not exist**, use the `smalltalk-dev:st-setup-project` skill to create the full project structure, or manually create it using Pharo's STON format (single quotes, tab indentation):
    ```
    {
    	'srcDirectory' : 'src'
    }
    ```
-   The `.project` file is **required** for Pharo to locate the source directory. Always create it when setting up a new project structure.
 
 3. **Typical project layout**:
    ```
@@ -77,6 +77,35 @@ import_package: 'MyPackage' path: '/home/user/MyProject/src'
 # If .project says "srcDirectory": "repositories"
 import_package: 'MyPackage' path: '/home/user/MyProject/repositories'
 ```
+
+### Docker Environment: Use Guest-Side Paths
+
+When Pharo runs inside a Docker container, **all paths passed to MCP tools must be container-internal (guest) paths**, not host paths.
+
+**Discovery steps:**
+
+1. Read `compose.yml` (or `docker-compose.yml`) in the project root to find volume mounts:
+   ```yaml
+   volumes:
+     - ./myproject:/root/repos/myproject
+   ```
+2. Translate: host `./myproject` → guest `/root/repos/myproject`
+3. Use the guest path in `import_package` and other MCP calls:
+   ```
+   import_package: 'MyPackage' path: '/root/repos/myproject/src'
+   ```
+
+✅ **Correct (Docker):**
+```
+import_package: 'MyPackage' path: '/root/repos/myproject/src'
+```
+
+❌ **Incorrect (host path leaked into Docker context):**
+```
+import_package: 'MyPackage' path: '/home/user/myproject/src'
+```
+
+**Always check `compose.yml` first** when a Docker setup is in use, to confirm which host directory maps to which container path before constructing any absolute path.
 
 ### Import Multiple Packages Individually
 
@@ -176,6 +205,28 @@ Work in Pharo → Export → Review .st file → Commit to git
 3. **Import to Pharo** immediately after editing
 4. **Test** to verify changes work
 5. **Repeat** as needed
+
+## Class Renaming
+
+### Rename in Pharo Before Importing
+
+When renaming a class, a Tonel-only rename is **not safe**. If you rename the class in the `.st` file and import without touching Pharo first, the old class remains in the image alongside the newly-created class under the new name.
+
+**Safe rename procedure:**
+
+1. **Rename in Pharo via eval** — run this before any file change:
+   ```smalltalk
+   (OldClassName rename: 'NewClassName') printString
+   ```
+
+2. **Update the Tonel file** — rename the `.st` file and update the class name inside it.
+
+3. **Import the package**:
+   ```
+   import_package: 'MyPackage' path: '/absolute/path/src'
+   ```
+
+This sequence ensures the class is renamed in-place rather than a new class being created alongside the old one.
 
 ## Import Timing
 
@@ -381,6 +432,26 @@ Add JSON serialization support to RediStick
 ### Pitfall 7: Ignoring Error Messages
 **Problem**: Repeated failures without understanding root cause
 **Solution**: Read error messages carefully, use `/st-eval` to debug
+
+### Pitfall 9: Renaming a Class Without Pharo-Side Rename First
+
+**Problem**: Renaming the class only in the Tonel file and importing leaves the old class still present in the Pharo image. Both the old and new class end up coexisting, and references to the old name break silently.
+
+**Solution**: Rename the class in Pharo *before* importing the renamed Tonel file.
+
+Step 1 — rename in Pharo via eval:
+```smalltalk
+(OldClassName rename: 'NewClassName') printString
+```
+
+Step 2 — rename the `.st` file to match the new class name.
+
+Step 3 — import the package:
+```
+import_package: 'MyPackage' path: '/absolute/path/src'
+```
+
+**This order is mandatory.** Swapping step 1 and step 3 will leave a ghost class under the old name in the image.
 
 ### Pitfall 8: Missing Required Config Files When Creating Project Structure
 **Problem**: Creating `src/` directories and `package.st` files but forgetting required config files
