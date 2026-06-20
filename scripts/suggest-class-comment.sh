@@ -1,19 +1,27 @@
 #!/bin/bash
 # Suggest class comments for modified Tonel files (occasionally)
 
+set -euo pipefail
+
 # Read hook input from stdin
 INPUT=$(cat)
 
-# Extract tool name and file path from hook input
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+# Extract file path from hook input
+# Try multiple possible formats for afterFileEdit event
+FILE_PATH=$(echo "$INPUT" | jq -r '.file_path // .tool_input.file_path // .path // empty' 2>/dev/null || echo "")
 
-# Only process Write/Edit operations on .st files
-if [[ "$TOOL_NAME" != "Write" && "$TOOL_NAME" != "Edit" ]]; then
-  exit 0
+# If no file path found, try to get from tool_input
+if [[ -z "$FILE_PATH" ]]; then
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || echo "")
 fi
 
-if [[ ! "$FILE_PATH" =~ \.st$ ]]; then
+# If still no file path, check if there's a direct path field
+if [[ -z "$FILE_PATH" ]]; then
+  FILE_PATH=$(echo "$INPUT" | jq -r 'if type == "string" then . else .path // .file // empty end' 2>/dev/null || echo "")
+fi
+
+# Only process .st files
+if [[ -z "$FILE_PATH" ]] || [[ ! "$FILE_PATH" =~ \.st$ ]]; then
   exit 0
 fi
 
@@ -25,12 +33,11 @@ if [ $RANDOM_NUM -ge 10 ]; then
   exit 0
 fi
 
-# Output decision to trigger /smalltalk-commenter
+# Output suggestion in standard Cursor hook format
 cat <<EOF
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "additionalContext": "💡 Tip: Modified Tonel file detected. Consider running /smalltalk-commenter to add or improve class comments for better documentation."
-  }
+  "continue": true,
+  "suppressOutput": false,
+  "systemMessage": "💡 Tip: Modified Tonel file detected ($FILE_PATH). Consider running /smalltalk-commenter to add or improve class comments for better documentation."
 }
 EOF
