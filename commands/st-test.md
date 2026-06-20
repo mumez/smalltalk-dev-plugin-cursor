@@ -1,48 +1,30 @@
 ---
 name: st-test
-description: Run SUnit tests
-allowed-tools:
-  - mcp__smalltalk-interop__run_class_test
-  - mcp__smalltalk-interop__run_package_test
+description: Run SUnit tests in the running Pharo image. Use when verifying changes after import, or when checking results for a specific test class or package.
+allowed-tools: mcp__smalltalk-interop__run_class_test mcp__smalltalk-interop__run_package_test
 ---
 
 # Run SUnit Tests
 
-Execute tests after importing changes.
+Execute SUnit tests after importing changes to Pharo.
 
 ## Usage
 
-```bash
-/st-test MyTestClass
-/st-test MyPackage-Tests
+```
+/st-test TestClassName       # run a single test class
+/st-test PackageName-Tests   # run all tests in a package
 ```
 
-## Implementation
+## Steps
 
-Uses `run_class_test` or `run_package_test` from pharo-interop MCP server.
-
-## Notes
-
-- Run tests after every import
-- Test class: `run_class_test`
-- Test package: `run_package_test`
+1. Determine whether the argument is a class name or a package name
+   - Class → call `run_class_test`
+   - Package → call `run_package_test`
+2. Report pass/fail counts and any failures
 
 ## Examples
 
-```bash
-# Run specific test class
+```
 /st-test RsJsonTest
-
-# Run all tests in package
 /st-test RediStick-Json-Tests
-```
-
-## MCP Tool Calls
-
-```
-# For test class
-mcp__smalltalk-interop__run_class_test: 'TestClassName'
-
-# For test package
-mcp__smalltalk-interop__run_package_test: 'PackageName-Tests'
 ```

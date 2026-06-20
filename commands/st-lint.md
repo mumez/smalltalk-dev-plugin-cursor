@@ -1,263 +1,83 @@
 ---
 name: st-lint
-description: Lint Tonel files for Smalltalk best practices before import
-allowed-tools:
-  - mcp__smalltalk-validator__lint_tonel_smalltalk_from_file
-  - mcp__smalltalk-validator__lint_tonel_smalltalk
-  - Glob
-  - Bash
+description: Smalltalk best-practices linter for Tonel files. Use when validating .st files before importing to Pharo, checking code quality after editing, or diagnosing style issues in a package.
+allowed-tools: mcp__smalltalk-validator__lint_tonel_smalltalk_from_file Glob Bash
 ---
 
 # Lint Tonel Files
 
-Analyze Tonel files for Smalltalk best practices and code quality issues before importing to Pharo. Uses the smalltalk-validator MCP server to check code quality.
+Validate Tonel `.st` files for Smalltalk best practices before importing to Pharo.
 
-## Usage
+## When to Use
 
-```bash
-# Lint specific file
-/st-lint src/MyPackage/MyClass.st
+- Before every `/st-import` — lint catches issues that would silently corrupt the image
+- After editing `.st` files — confirm no style regressions
+- When import fails with unexpected behavior — lint may reveal the root cause
 
-# Lint entire package
-/st-lint src/MyPackage
+## Step 1: Check Meta Files (manual — MCP cannot validate these)
 
-# Lint all packages in src/
-/st-lint src
+Before linting, verify required Tonel meta files exist:
+
+| File | Location | Required |
+|------|----------|---------|
+| `.project` | repo root | ✅ |
+| `src/.properties` | `src/` directory | ✅ |
+| `package.st` | each package directory | ✅ |
+
+If any are missing, **warn the user, suggest `/st-setup-project`, and continue linting** — lint results are still useful even when meta files are absent, since the linter operates on `.st` file syntax independently.
+
+Expected `src/.properties` content:
 ```
-
-## Lint Rules
-
-The MCP server checks for the following Smalltalk best practices:
-
-### 1. Class Prefix Check (Warning)
-
-**Rule**: Classes should have a project-specific prefix to avoid name collisions.
-
-**Examples**:
-- ✅ `STUser`, `JSONParser`, `RedisClient` (prefixed)
-- ⚠️ `User`, `Parser`, `Client` (no prefix - potential collision)
-
-**Exceptions**:
-- Test classes (ending with `Test`)
-- BaselineOf classes
-
-### 2. Method Length Check (Warning/Error)
-
-**Rule**: Methods should be concise and focused.
-
-**Limits**:
-- **Standard methods**: 15 lines (Warning at 16+, Error at 25+)
-- **UI building methods**: 40 lines (Warning at 41+)
-- **Test methods**: 40 lines (Warning at 41+)
-
-**Examples**:
-```smalltalk
-"✅ Good: Focused 5-line method"
-Person >> fullName [
-    ^ firstName, ' ', lastName
-]
-
-"⚠️ Warning: 20 lines (consider extracting helpers)"
-Calculator >> complexCalculation [
-    "... 20 lines of logic ..."
-]
-
-"❌ Error: 30 lines in standard method"
-DataProcessor >> process [
-    "... 30 lines - refactor needed ..."
-]
-```
-
-### 3. Instance Variable Count Check (Warning)
-
-**Rule**: Classes should have focused responsibilities with limited instance variables.
-
-**Limits**:
-- **Standard classes**: 10 instance variables max
-- **Warning**: 11+ variables suggests responsibility splitting needed
-
-**Examples**:
-```smalltalk
-"✅ Good: 4 focused instance variables"
-Class {
-    #name : #Person,
-    #instVars : [
-        'firstName',
-        'lastName',
-        'age',
-        'email'
-    ]
-}
-
-"⚠️ Warning: 12 variables - consider splitting"
-Class {
-    #name : #User,
-    #instVars : [
-        'firstName', 'lastName', 'email', 'phone',
-        'address', 'city', 'state', 'zip',
-        'role', 'permissions', 'preferences', 'settings'
-    ]
-}
-```
-
-### 4. Direct Instance Variable Access Check (Warning)
-
-**Rule**: Access instance variables through methods, not directly (except in initialization and accessors).
-
-**Rationale**:
-- Enables lazy initialization
-- Allows subclass overrides
-- Provides hook points for validation
-
-**Examples**:
-```smalltalk
-"✅ Good: Access via method"
-Person >> greet [
-    ^ 'Hello, ', self firstName
-]
-
-"✅ OK: Direct access in initialize"
-{ #category : #initialization }
-Person >> initialize [
-    super initialize.
-    firstName := ''.
-    age := 0
-]
-
-"⚠️ Warning: Direct access in business logic"
-{ #category : #operations }
-Person >> processName [
-    ^ firstName asUppercase  "Should be: self firstName asUppercase"
-]
-```
-
-## Implementation
-
-This command uses the `mcp__smalltalk-validator__lint_tonel_smalltalk_from_file` MCP tool to perform linting.
-
-### Step 1: Determine Scope
-
-```bash
-TARGET="$1"
-
-if [ -z "$TARGET" ]; then
-  echo "Error: No target specified"
-  echo "Usage: /st-lint <file-or-directory>"
-  exit 1
-fi
-
-# Collect files to lint
-if [ -f "$TARGET" ]; then
-  FILES=("$TARGET")
-elif [ -d "$TARGET" ]; then
-  FILES=($(find "$TARGET" -name "*.st" ! -name "package.st"))
-else
-  echo "Error: $TARGET not found"
-  exit 1
-fi
-```
-
-### Step 2: Lint Each File
-
-For each `.st` file (excluding `package.st`), call the MCP lint tool:
-
-```bash
-for file in "${FILES[@]}"; do
-  echo "Linting: $file"
-
-  # Call MCP lint tool
-  mcp__smalltalk-validator__lint_tonel_smalltalk_from_file "$file"
-done
-```
-
-### Step 3: Report Results
-
-The MCP server returns lint results in this format:
-
-```json
 {
-  "success": true,
-  "file_path": "/path/to/MyClass.st",
-  "issue_list": [
-    {
-      "severity": "warning",
-      "message": "No class prefix: Person (consider adding project prefix)",
-      "class_name": "Person",
-      "selector": null,
-      "is_class_method": false
-    },
-    {
-      "severity": "warning",
-      "message": "Method 'complexProcess' long: 22 lines (recommended: 15)",
-      "class_name": "Person",
-      "selector": "complexProcess",
-      "is_class_method": false
-    }
-  ],
-  "issues_count": 2,
-  "warnings_count": 2,
-  "errors_count": 0
+	#format : #tonel
 }
 ```
 
-### Step 4: Display and Exit
+## Step 2: Collect `.st` Files
 
-Display the lint results and exit with appropriate code:
+Resolve the target to a list of absolute paths:
 
-```bash
-# Exit codes
-# 0: No issues
-# 1: Warnings only
-# 2: Errors found
+- **Single file** (`src/MyPackage/MyClass.st`): use directly, skip if it is `package.st`
+- **Package directory** (`src/MyPackage`): Glob `**/*.st`, exclude `package.st`
+- **src root** (`src`): Glob `**/*.st` across all packages, exclude `package.st`
+
+Always convert to **absolute paths** before passing to the MCP tool.
+
+## Step 3: Lint Each File
+
+Call `mcp__smalltalk-validator__lint_tonel_smalltalk_from_file` with the absolute path, one file at a time.
+
+## Step 4: Report Results
+
+Show a summary per file:
+
+```
+src/MyPackage/MyClass.st — ✅ clean
+src/MyPackage/AnotherClass.st — ⚠️ 2 warnings
+  • [warning] Method #doSomething has no comment
+  • [warning] Temporary variable 'x' shadows outer scope
+src/MyPackage/BrokenClass.st — ❌ 1 error
+  • [error] Syntax error near ']'
 ```
 
-## Usage Examples
+**Exit status semantics:**
 
-### Example 1: Lint Single File
+| Result | Meaning | Action |
+|--------|---------|--------|
+| 0 — clean | No issues | Proceed to import |
+| 1 — warnings only | Style issues | Proceed to import, consider fixing |
+| 2 — errors found | Syntax/structural errors | Fix before importing |
 
-```bash
-/st-lint src/MyPackage/Person.st
-```
+## Interpreting Common Issues
 
-The MCP tool will analyze the file and return issues found.
+| Issue | Likely Cause | Fix |
+|-------|-------------|-----|
+| `Syntax error near '...'` | Unclosed bracket/paren, missing period | Check the indicated line |
+| `Method has no comment` | Missing method comment | Add a brief comment |
+| `Temporary variable shadows outer scope` | Variable name collision | Rename the temp var |
+| `Missing package.st` | package.st not found | Create it: `Package { #name : 'PkgName' }` |
 
-### Example 2: Lint Entire Package
+## Related Skills
 
-```bash
-/st-lint src/MyPackage
-```
-
-Lints all `.st` files in the package directory.
-
-### Example 3: Lint Before Import Workflow
-
-```bash
-# Recommended workflow
-/st-lint src/MyPackage       # Check code quality (MCP)
-/st-import MyPackage /absolute/path/src  # Import to Pharo
-/st-test MyPackage-Tests     # Run tests
-```
-
-## Integration with Other Commands
-
-- **Before `/st-import`**: Run lint to ensure code quality
-- **After code generation**: Lint AI-generated code
-- **CI/CD**: Add to pre-commit hooks
-
-## Related Commands
-
-- **`/st-validate`** - Syntax validation (Tonel structure)
-- **`/st-import`** - Import to Pharo (after linting)
-- **`/st-test`** - Run tests (after import)
-
-## Execution notes
-
-When executing this command:
-
-1. **Read target files** - Use Read tool to analyze Tonel files
-2. **Apply rules systematically** - Check each rule for each file
-3. **Provide clear output** - Show file name, issue type, line number
-4. **Prioritize errors** - Distinguish between warnings and errors
-5. **Suggest fixes** - Provide actionable recommendations
-
-This command helps maintain high code quality and idiomatic Smalltalk style before importing to Pharo.
+- `smalltalk-dev:st-setup-project` — Create missing meta files
+- `smalltalk-dev:smalltalk-developer` — Full Edit → Lint → Import → Test workflow
