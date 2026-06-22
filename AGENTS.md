@@ -5,9 +5,11 @@
 ### What this repo is
 `smalltalk-dev` is a **Cursor plugin** for AI-driven Pharo Smalltalk development. It is not a
 buildable application — it is declarative content: slash commands (`commands/*.md`), AI skills
-(`skills/*/SKILL.md`), an `afterFileEdit` hook (`hooks/hooks.json` → `scripts/suggest-class-comment.sh`,
-needs `jq`), and MCP server wiring (`mcp.json`). There is no compile/build/lint/test step for the
-repo itself. See `README.md` and `doc/Commands.md` for the user-facing command reference.
+(`skills/*/SKILL.md`), a `postToolUse` hook (`hooks/hooks.json` → `scripts/suggest-class-comment.sh`,
+matcher `Write`, needs `jq`; emits `additional_context` to nudge `/smalltalk-commenter` after a
+sizeable uncommented Tonel class file is written), and MCP server wiring (`mcp.json`). There is no
+compile/build/lint/test step for the repo itself. See `README.md` and `doc/Commands.md` for the
+user-facing command reference.
 
 The plugin's actual functionality is delivered by two MCP servers (launched via `uvx`, defined in
 `mcp.json`) plus a live Pharo image:
