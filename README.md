@@ -280,7 +280,7 @@ smalltalk-dev-plugin-cursor/
 ├── hooks/
 │   └── hooks.json           # PostToolUse hook configuration
 ├── scripts/
-│   └── suggest-class-comment.sh  # PostToolUse hook for documentation suggestions
+│   └── suggest-class-comment.py  # postToolUse hook (uv run python) for documentation suggestions
 ├── doc/
 │   └── Commands.md               # Commands quick reference
 ├── README.md                 # This file
