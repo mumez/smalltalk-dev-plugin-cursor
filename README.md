@@ -80,9 +80,20 @@ Install [uv](https://docs.astral.sh/uv/), which is used in MCP.
 
 ## Installation
 
+You can install this plugin from either the GUI or CLI.
+
+### GUI
+
+1. Open `Settings`.
+2. Navigate to `Plugins`.
+3. Paste the following into **Search or Paste Link**:
+
+   `https://github.com/mumez/smalltalk-dev-plugin-cursor`
+
+### CLI (agent)
+
 ```bash
-# Install the plugin
-/add-plugin smalltalk-dev
+/plugin marketplace add https://github.com/mumez/smalltalk-dev-plugin-cursor
 ```
 
 ### Verify Installation
@@ -159,13 +170,6 @@ These are configured automatically via `.mcp.json`. You can customize the Pharo 
 
 ```bash
 export PHARO_SIS_PORT=8086  # default
-```
-
-## Uninstallation
-
-```bash
-# Remove the plugin
-/remove-plugin smalltalk-dev
 ```
 
 ## Best Practices
