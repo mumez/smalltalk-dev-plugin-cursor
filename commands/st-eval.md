@@ -1,132 +1,93 @@
 ---
 name: st-eval
-description: Execute Smalltalk code snippet
-allowed-tools:
-  - mcp__smalltalk-interop__eval
+description: Smalltalk code evaluator for Pharo via MCP. Use when executing Smalltalk expressions, verifying object state or intermediate values, debugging code incrementally, checking Pharo connection, or running quick experiments.
+allowed-tools: mcp__smalltalk-interop__eval
 ---
 
 # Execute Smalltalk Code
 
-Execute arbitrary Smalltalk code snippets for quick testing, verification, or connection checks.
+Evaluate arbitrary Smalltalk expressions in the running Pharo image via `mcp__smalltalk-interop__eval`.
 
-## Usage
+## Essential Rules
 
-```bash
-/st-eval 1 + 1
-/st-eval Smalltalk version
-/st-eval MyClass new doSomething
+**Always use `printString`** — MCP returns serialized output. Raw objects cause errors or unreadable results:
+
+```smalltalk
+✅ MyClass new doSomething printString
+✅ collection printString
+❌ MyClass new doSomething
 ```
 
-## Implementation
+**Wrap risky code in `on:do:`** — Uncaught errors in eval crash the MCP call with no useful message:
 
-Uses `eval` from pharo-interop MCP server.
-
-## Notes
-
-- Test smalltalk-interop connection
-- Execute partial test code
-- Verify intermediate values
-- Debug with error handling patterns
-
-## Common Use Cases
-
-### Connection Check
-```bash
-/st-eval Smalltalk version
-/st-eval 1 + 1
-```
-
-### Quick Object Testing
-```bash
-/st-eval MyClass new
-/st-eval Person new firstName: 'John'; lastName: 'Doe'; fullName
-```
-
-### Partial Test Execution
-```bash
-/st-eval | result |
-result := Array new: 2.
-[ | obj |
-  obj := MyClass new name: 'Test'.
-  result at: 1 put: obj getName.
-] on: Error do: [:ex | result at: 2 put: ex description].
-^ result
-```
-
-### Debugging Patterns
-
-**Basic Error Capture:**
 ```smalltalk
 | result |
 result := Array new: 2.
-[ | ret |
-  ret := objA doAAA.
-  result at: 1 put: ret printString.
-] on: Error do: [:ex | result at: 2 put: (ex description)].
+[ result at: 1 put: (riskyOperation) printString ]
+  on: Error do: [:ex | result at: 2 put: ex description].
 ^ result
 ```
 
-**Check Intermediate Values:**
+**Use `fork` for blocking operations** — Code that opens a dialog or blocks the image will cause the MCP call to hang indefinitely. Detach it:
+
 ```smalltalk
-| intermediate result |
-intermediate := objA computeStep1.
-result := intermediate processStep2.
-^ result printString
+[ <blocking expression> ] fork.
+^ 'started'
 ```
 
-**Debug Collections:**
+## Common Patterns
+
+### Connection check
 ```smalltalk
-| items filtered mapped |
-items := self getItems.
-filtered := items select: [:each | each isValid].
-mapped := filtered collect: [:each | each name].
-^ { 
-    'items size' -> items size. 
-    'filtered size' -> filtered size. 
-    'mapped' -> mapped 
-  } asDictionary printString
+Smalltalk version
 ```
 
-## Examples
+### Inspect intermediate values
+```smalltalk
+| step1 step2 |
+step1 := objA computeStep1.
+step2 := step1 processStep2.
+^ { 'step1' -> step1 printString. 'step2' -> step2 printString } asDictionary printString
+```
 
-```bash
-# Simple expression
-/st-eval 2 + 2
+### Inspect object state
+```smalltalk
+{
+  'class' -> obj class name.
+  'value' -> obj printString.
+  'size'  -> obj size printString
+} asDictionary printString
+```
 
-# Check Pharo version
-/st-eval Smalltalk version
+### Safe collection access
+```smalltalk
+collection ifEmpty: ['empty'] ifNotEmpty: [:col | col first printString]
+```
 
-# Object creation and method call
-/st-eval Person new firstName: 'Alice'; yourself
-
-# With error handling
-/st-eval | result |
+### Error-capturing eval
+```smalltalk
+| result |
 result := Array new: 2.
-[ result at: 1 put: (10 / 0) ]
-on: Error do: [:ex | result at: 2 put: ex description].
+[
+  | obj |
+  obj := MyClass new name: 'Test'.
+  result at: 1 put: obj process printString.
+] on: Error do: [:ex |
+  result at: 2 put: ex description
+].
 ^ result
-
-# Collection inspection
-/st-eval #(1 2 3 4 5) select: [:n | n even]
-
-# Dictionary operations
-/st-eval | dict |
-dict := Dictionary new.
-dict at: 'name' put: 'Test'.
-dict at: 'value' put: 42.
-^ dict printString
 ```
 
-## MCP Tool Call
+## Troubleshooting
 
-```
-mcp__smalltalk-interop__eval: 'Smalltalk code here'
-```
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| MCP call hangs / no response | Blocking operation (dialog, modal, infinite loop) | Wrap in `fork` |
+| `Error: cannot serialize` | Returning raw object | Add `printString` |
+| Debugger window opened in Pharo | Uncaught error triggered Pharo debugger | Close debugger in Pharo, then re-eval with `on:do:` |
+| `MessageNotUnderstood` | Method doesn't exist or typo | Check with `mcp__smalltalk-interop__search_implementors` |
 
-## Tips
+## Related Skills
 
-- Always use `printString` when returning objects to get readable output
-- Use error handling pattern (`on: Error do:`) for debugging
-- Multi-line code is supported
-- Useful for verifying behavior before writing full tests
-- See `smalltalk-debugger` skill for more debugging patterns
+- `smalltalk-dev:smalltalk-debugger` — Systematic debugging workflow using eval
+- `smalltalk-dev:st-init` — Verify Pharo connection if eval fails unexpectedly

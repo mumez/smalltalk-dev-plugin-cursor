@@ -1,8 +1,11 @@
 {
+  "version": 1,
   "hooks": {
-    "afterFileEdit": [
+    "postToolUse": [
       {
-        "command": "./scripts/suggest-class-comment.sh"
+        "command": "uv run --no-project python ${CURSOR_PLUGIN_ROOT}/scripts/suggest-class-comment.py",
+        "matcher": "Write",
+        "timeout": 30
       }
     ]
   }

@@ -27,6 +27,10 @@ test-env/
 .cursor/
 cursor-utils/
 
+# Python
+__pycache__/
+*.pyc
+
 # Claude
 CLAUDE.md
 .claude/

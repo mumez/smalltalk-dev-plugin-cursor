@@ -1,46 +1,34 @@
 ---
 name: st-import
-description: Import Tonel package to Pharo image
-allowed-tools:
-  - mcp__smalltalk-interop__import_package
-  - mcp__smalltalk-validator__validate_tonel_smalltalk_from_file
+description: Import Tonel package into running Pharo image. Use when loading edited .st files into Pharo after code changes.
+allowed-tools: mcp__smalltalk-interop__import_package mcp__smalltalk-validator__validate_tonel_smalltalk_from_file
 ---
 
 # Import Tonel Package
 
-Import edited Tonel files into running Pharo image.
+Import edited Tonel files into the running Pharo image.
 
 ## Usage
 
-```bash
-/st-import MyPackage /home/user/project/src
-/st-import MyPackage-Tests /home/user/project/src
-/st-import MyPackage  # Uses current directory
+```
+/st-import PackageName /absolute/path/to/src
 ```
 
-## Implementation
+## Steps
 
-Uses `import_package` from pharo-interop MCP server.
-Always use absolute paths for reliability.
+1. Call `import_package` with package name and absolute path to the `src/` directory
+2. Report success or error from the result
 
 ## Notes
 
-- Re-import after every change
+- Always use absolute paths
+- Use the **package parent directory** as the path — do not include the package name in the path
 - Import main package before test package
-- Use absolute paths only
+- Re-import after every change
 
 ## Examples
 
-```bash
-# Import main package
+```
 /st-import RediStick-Json /home/user/git/RediStick/src
-
-# Import test package
 /st-import RediStick-Json-Tests /home/user/git/RediStick/src
-```
-
-## MCP Tool Call
-
-```
-mcp__smalltalk-interop__import_package: 'PackageName' path: '/absolute/path/to/src'
 ```

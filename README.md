@@ -6,7 +6,7 @@
 
 ## Overview
 
-This plugin provides a minimal, practical toolkit for Smalltalk development using AI skills. It focuses on the essential workflow of editing Tonel files, importing them into Pharo, and running tests.
+This plugin provides a comprehensive AI-powered toolkit for Pharo Smalltalk development. It covers the full development lifecycle — from project setup and Tonel file editing, to importing, testing, debugging, and documentation generation.
 
 ## Features
 
@@ -56,11 +56,27 @@ For experienced users who prefer direct commands, see [Commands.md](doc/Commands
 
 ### 1. Pharo with PharoSmalltalkInteropServer
 
+Choose one of the following options:
+
+#### Option A: Use Docker (Easy)
+
+Run a pre-configured Pharo image using [smalltalk-interop-docker](https://github.com/mumez/smalltalk-interop-docker):
+
+```bash
+docker compose up -d
+```
+
+#### Option B: Local Pharo Setup
+
 Install [PharoSmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer) in your Pharo image.
 
 ### 2. Cursor
 
 Install [Cursor](https://cursor.com/) from the official site.
+
+### 3. uv
+
+Install [uv](https://docs.astral.sh/uv/), which is used in MCP.
 
 ## Installation
 
@@ -248,11 +264,11 @@ smalltalk-dev-plugin-cursor/
 │   ├── smalltalk-developer/
 │   │   ├── SKILL.md         # Development workflow
 │   │   ├── examples/        # Development sessions
-│   │   └── references/      # Best practices, Tonel format
+│   │   └── references/      # Best practices, patterns, style guide, Tonel format
 │   ├── smalltalk-debugger/
 │   │   ├── SKILL.md         # Debugging techniques
 │   │   ├── examples/        # Debug scenarios
-│   │   └── references/      # Error patterns, inspection, UI debugging
+│   │   └── references/      # Error patterns, inspection, logging, UI debugging
 │   ├── smalltalk-usage-finder/
 │   │   ├── SKILL.md         # Usage exploration
 │   │   ├── examples/        # Usage scenarios
@@ -264,12 +280,24 @@ smalltalk-dev-plugin-cursor/
 ├── hooks/
 │   └── hooks.json           # PostToolUse hook configuration
 ├── scripts/
-│   └── suggest-class-comment.sh  # PostToolUse hook for documentation suggestions
+│   └── suggest-class-comment.py  # postToolUse hook (uv run python) for documentation suggestions
 ├── doc/
 │   └── Commands.md               # Commands quick reference
 ├── README.md                 # This file
 └── LICENSE
 ```
+
+## Presentation
+
+- [Introducing smalltalk-dev Plugin](https://mumez.github.io/smalltalk-dev-plugin-slides/introducing-smalltalk-dev-plugin-en.html)
+
+## Examples
+
+Projects built with this plugin:
+
+- [smalltalk-dev-plugin-money-example](https://github.com/mumez/smalltalk-dev-plugin-money-example) - Multi-currency Money class with arithmetic operations and exchange rate conversion
+- [smalltalk-dev-plugin-graph-example](https://github.com/mumez/smalltalk-dev-plugin-graph-example) - Directed weighted graph with Dijkstra's shortest-path algorithm
+- [smalltalk-dev-plugin-gui-example](https://github.com/mumez/smalltalk-dev-plugin-gui-example) - Interactive to-do list app built with the Spec2 framework
 
 ## Contributing
 

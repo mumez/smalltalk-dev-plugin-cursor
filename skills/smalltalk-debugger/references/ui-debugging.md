@@ -42,6 +42,8 @@ The `read_screen` tool captures screenshots and extracts UI structure from the r
 - `false`: Returns only UI structure data (faster execution)
 - For debugger detection, screenshots are optional but can be helpful
 
+> **Docker note**: When Pharo runs inside Docker (check by `docker ps`), screenshot files are saved to `/root/screenshots` inside the container, not to `/tmp` on the host. Check `compose.yml` `volumes:` to find where `/root/screenshots` is mounted on the host side before looking for screenshot files.
+
 ### Return Structure
 
 The tool returns a structured representation of the UI hierarchy:
@@ -272,6 +274,8 @@ mcp__smalltalk-interop__read_screen: target_type='world', capture_screenshot=fal
 
 Fast execution without screenshot overhead provides immediate visibility.
 
+If you need to locate a saved screenshot file and Pharo is running in Docker, check `compose.yml` for the host-side mount of `/root/screenshots` (it is **not** necessarily `/tmp` on the host).
+
 ### 2. Clear User Communication
 
 Always explain:
@@ -295,6 +299,54 @@ Help users avoid debuggers by:
 - Testing code incrementally
 - Validating inputs before operations
 - Running tests regularly to catch issues early
+
+## UI Debugging of Spec2
+
+Use `read_screen` to verify Spec2 presenter UIs during development.
+
+### Basic Workflow
+
+**Open a presenter and inspect:**
+```smalltalk
+" Open the presenter "
+xxxPresenter := XxxPresenter new open.
+```
+Then call:
+```
+mcp__smalltalk-interop__read_screen: target_type='spec'
+```
+
+**Close after inspection:**
+```smalltalk
+xxxPresenter window close.
+```
+
+**Close all instances at once:**
+```smalltalk
+XxxPresenter allInstances do: [:e | e window close].
+```
+
+### Navigating Presenter Hierarchy
+
+Presenters are view models, so you can traverse child presenters and send messages to change state before calling `read_screen`:
+
+```smalltalk
+" Access a child presenter "
+xxxPresenter yyyPresenter.
+
+" Change state, then inspect the result via read_screen "
+xxxPresenter yyyPresenter updateWith: someData.
+```
+
+After sending state-changing messages, call `read_screen` again to verify the UI reflects the new state.
+
+### Typical Debugging Cycle
+
+1. `XxxPresenter new open` — open the UI
+2. `read_screen target_type='spec'` — capture current state
+3. Send messages to the presenter to change state
+4. `read_screen` again — verify the display updated correctly
+5. `xxxPresenter window close` — close when done
 
 ## Summary
 
