@@ -3,21 +3,21 @@
 ## Cursor Cloud specific instructions
 
 ### What this repo is
-`smalltalk-dev` is a **Cursor plugin** for AI-driven Pharo Smalltalk development. It is not a
-buildable application — it is declarative content: slash commands (`commands/*.md`), AI skills
-(`skills/*/SKILL.md`), a `postToolUse` hook (`hooks/hooks.json` → `scripts/suggest-class-comment.py`,
-matcher `Write`, launched via `uv run python` so it is cross-platform incl. Windows; emits
-`additional_context` to nudge `/smalltalk-commenter` after a sizeable uncommented Tonel class file is
-written), and MCP server wiring (`mcp.json`). There is no compile/build/lint/test step for the repo
-itself. See `README.md` and `doc/Commands.md` for the user-facing command reference.
+`smalltalk-dev` is a **Cursor plugin** for AI-driven Smalltalk (Pharo/Squeak) development. It is not a
+buildable application — it is declarative content: slash commands (`commands/*.md`, synced from upstream
+`skills/st-*/SKILL.md`), AI skills (`skills/*/SKILL.md`, including `st-*` for Skill-tool routing),
+and MCP server wiring (`mcp.json`). There is no compile/build/lint/test step for the repo itself.
+See `README.md` and `doc/Commands.md` for the user-facing command reference.
 
 The plugin's actual functionality is delivered by two MCP servers (launched via `uvx`, defined in
-`mcp.json`) plus a live Pharo image:
+`mcp.json`) plus a live Smalltalk image:
 
-- `smalltalk-validator` — stateless Tonel lint/validate (no Pharo needed). Built from
+- `smalltalk-validator` — stateless Tonel lint/validate (no Smalltalk image needed). Built from
   `git+https://github.com/mumez/smalltalk-validator-mcp-server.git@main`.
-- `smalltalk-interop` — bridges to a running Pharo image over HTTP (`PHARO_SIS_PORT`, default `8086`).
-  Built from `git+https://github.com/mumez/pharo-smalltalk-interop-mcp-server.git`.
+- `smalltalk-interop` — bridges to a running Pharo or Squeak image over HTTP (`SIS_PORT`, default `8086`).
+  Built from `git+https://github.com/mumez/smalltalk-interop-mcp-server.git`.
+
+Class-comment suggestions after lint are handled via `st-lint` → `smalltalk-commenter` (no hooks).
 
 ### Non-obvious environment caveats
 - **`uv`/`uvx` is the runtime for both MCP servers** and lives in `~/.local/bin` (on `PATH` via
@@ -36,13 +36,14 @@ The plugin's actual functionality is delivered by two MCP servers (launched via 
 - **Services are never auto-started by the update script.** Start the interop server manually when you
   need import/test/eval against Pharo:
   ```bash
-  cd ~/pharo && PHARO_SIS_PORT=8086 ./pharo Pharo.image eval --no-quit "SisServer current start"
+  cd ~/pharo && ./pharo Pharo.image eval --no-quit "SisServer current start"
   ```
   Run it in a tmux session (it stays in the foreground keeping the headless VM alive). Health check:
   ```bash
   curl -X POST http://localhost:8086/eval/ -H "Content-Type: application/json" -d '{"code":"Smalltalk version"}'
   ```
+  Set `SIS_PORT=8086` in `mcp.json` (default) so the MCP client matches the image HTTP port.
 - **Do not run a second `./pharo Pharo.image ...` while the server VM is running** — both lock the same
   image file and the second one silently produces no output. Use the HTTP endpoint (or the interop MCP)
   to talk to the running image instead.
-- The validator path (lint/validate Tonel) works **without** Pharo running.
+- The validator path (lint/validate Tonel) works **without** a Smalltalk image running.
