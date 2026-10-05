@@ -1,19 +1,18 @@
 # smalltalk-dev Plugin
 
-[Cursor](https://cursor.com/) plugin for AI-driven Smalltalk (Pharo) development.
+[Cursor](https://cursor.com/) plugin for AI-driven Smalltalk (Pharo/Squeak) development.
 
 > [Claude Code version](https://github.com/mumez/smalltalk-dev-plugin) is also available.
 
 ## Overview
 
-This plugin provides a comprehensive AI-powered toolkit for Pharo Smalltalk development. It covers the full development lifecycle — from project setup and Tonel file editing, to importing, testing, debugging, and documentation generation.
+This plugin provides a comprehensive AI-powered toolkit for Smalltalk development (Pharo or Squeak). It covers the full development lifecycle — from project setup and Tonel file editing, to importing, testing, debugging, and documentation generation.
 
 ## Features
 
 - **Commands**: Essential slash commands for import, test, eval, and validation
-- **Skills**: AI-powered development workflow, debugging expertise, and documentation
-- **MCP Integration**: Seamless connection to Pharo and validation servers
-- **Hooks**: Automatic suggestions after file changes
+- **Skills**: AI-powered development workflow, debugging expertise, and documentation (including `st-*` skills for Skill-tool routing)
+- **MCP Integration**: Seamless connection to a Smalltalk image and validation servers
 
 ## Usage
 
@@ -54,11 +53,11 @@ For experienced users who prefer direct commands, see [Commands.md](doc/Commands
 
 ## Prerequisites
 
-### 1. Pharo with PharoSmalltalkInteropServer
+### 1. A Smalltalk Image with a Smalltalk Interop Server
 
-Choose one of the following options:
+Choose Pharo or Squeak, then one of the following options:
 
-#### Option A: Use Docker (Easy)
+#### Option A: Use Docker (Easy, Pharo only)
 
 Run a pre-configured Pharo image using [smalltalk-interop-docker](https://github.com/mumez/smalltalk-interop-docker):
 
@@ -66,9 +65,12 @@ Run a pre-configured Pharo image using [smalltalk-interop-docker](https://github
 docker compose up -d
 ```
 
-#### Option B: Local Pharo Setup
+#### Option B: Local Setup
 
-Install [PharoSmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer) in your Pharo image.
+Install the Interop Server that matches your Smalltalk dialect:
+
+- Pharo: [PharoSmalltalkInteropServer](https://github.com/mumez/PharoSmalltalkInteropServer)
+- Squeak: [SqueakSmalltalkInteropServer](https://github.com/mumez/SqueakSmalltalkInteropServer)
 
 ### 2. Cursor
 
@@ -102,15 +104,15 @@ After installation, you should see the custom commands starting with `/st-`.
 
 ### Commands
 
-The plugin provides essential commands for Smalltalk development:
+The plugin provides essential slash commands for Smalltalk development (content synced from upstream `st-*` skills):
 
 - `/st-buddy` - Start your friendly Smalltalk development assistant (recommended starting point)
 - `/st-init` - Load smalltalk-developer skill and explain workflow
-- `/st-setup-project` - Set up Pharo project structure
+- `/st-setup-project` - Set up Smalltalk project structure
 - `/st-eval` - Execute Smalltalk code snippets
 - `/st-lint` - Check code quality and best practices
-- `/st-import` - Import Tonel packages to Pharo
-- `/st-export` - Export packages from Pharo
+- `/st-import` - Import Tonel packages to the Smalltalk image
+- `/st-export` - Export packages from the Smalltalk image
 - `/st-test` - Run SUnit tests
 - `/st-validate` - Validate Tonel syntax
 
@@ -118,9 +120,9 @@ The plugin provides essential commands for Smalltalk development:
 
 For command details and advanced usage, see [Commands.md](doc/Commands.md).
 
-### Skills
+### Background Skills
 
-The plugin includes specialized AI skills that activate automatically based on your needs:
+The plugin includes specialized AI skills that activate automatically based on your needs (also available under `skills/` for the Skill tool, including `st-*`):
 
 - **smalltalk-developer** - Development workflow and best practices
 - **smalltalk-debugger** - Error handling and debugging procedures
@@ -132,19 +134,16 @@ The plugin includes specialized AI skills that activate automatically based on y
 
 #### /smalltalk-commenter (Documentation Skill)
 
-Automatically suggests class documentation improvements:
+Generates and improves CRC-style class comments:
 
-- Detects undocumented classes after file changes (occasionally, not every time)
-- Generates CRC-style class comments
-- Can be invoked directly: `/smalltalk-commenter`
-
-**Works quietly in the background** - you'll get occasional suggestions to improve documentation.
+- Often suggested after `/st-lint` flags missing or poor class comments
+- Can be invoked directly when documenting packages or classes
 
 ### MCP Tools
 
 The plugin exposes all tools from both MCP servers:
 
-**pharo-interop** (22 tools):
+**smalltalk-interop** (22 tools):
 - `eval`: Execute Smalltalk expressions
 - `import_package`, `export_package`: Package management
 - `run_class_test`, `run_package_test`: Test execution
@@ -163,13 +162,13 @@ The plugin exposes all tools from both MCP servers:
 
 The plugin uses two MCP servers:
 
-1. **pharo-interop**: Communication with Pharo image
+1. **smalltalk-interop**: Communication with Smalltalk image (Pharo or Squeak)
 2. **smalltalk-validator**: Tonel syntax validation
 
-These are configured automatically via `.mcp.json`. You can customize the Pharo port:
+These are configured automatically via `mcp.json` in this plugin. You can customize the Smalltalk HTTP port:
 
 ```bash
-export PHARO_SIS_PORT=8086  # default
+export SIS_PORT=8086  # default
 ```
 
 ## Best Practices
@@ -177,7 +176,7 @@ export PHARO_SIS_PORT=8086  # default
 ### Development Workflow
 1. **Edit** Tonel files (AI editor is the source of truth)
 2. **Lint** code with `/st-lint` to check quality
-3. **Import** to Pharo with absolute paths
+3. **Import** to the Smalltalk image with absolute paths
 4. **Test** after every import
 
 ### Code Quality
@@ -193,7 +192,7 @@ export PHARO_SIS_PORT=8086  # default
 
 ### File Editing
 - **AI editor is the source of truth** (Tonel files)
-- Avoid editing in Pharo directly
+- Avoid editing in the Smalltalk image directly
 - Use `export_package` only when necessary
 
 ### Import Timing
@@ -216,7 +215,7 @@ export PHARO_SIS_PORT=8086  # default
 
 ### "Connection refused" error
 
-Make sure PharoSmalltalkInteropServer is running:
+Make sure the Smalltalk Interop Server (PharoSmalltalkInteropServer or SqueakSmalltalkInteropServer) is running:
 
 ```smalltalk
 SisServer current start.
@@ -239,7 +238,7 @@ SisServer current.  "Should show running server"
 
 ### Import seems to do nothing
 
-- Check Pharo Transcript for error messages
+- Check the Smalltalk image's Transcript for error messages
 - Verify server port matches configuration: `SisServer teapotConfig`
 - Try `/st-eval Smalltalk version` to test connection
 
@@ -263,28 +262,12 @@ smalltalk-dev-plugin-cursor/
 │   ├── st-lint.md           # /st-lint - Check code quality
 │   └── st-validate.md       # /st-validate - Validate Tonel syntax
 ├── skills/
+│   ├── st-buddy/ … st-validate/   # User commands (also mirrored under commands/)
 │   ├── smalltalk-commenter/
-│   │   └── SKILL.md         # Documentation specialist skill
 │   ├── smalltalk-developer/
-│   │   ├── SKILL.md         # Development workflow
-│   │   ├── examples/        # Development sessions
-│   │   └── references/      # Best practices, patterns, style guide, Tonel format
 │   ├── smalltalk-debugger/
-│   │   ├── SKILL.md         # Debugging techniques
-│   │   ├── examples/        # Debug scenarios
-│   │   └── references/      # Error patterns, inspection, logging, UI debugging
 │   ├── smalltalk-usage-finder/
-│   │   ├── SKILL.md         # Usage exploration
-│   │   ├── examples/        # Usage scenarios
-│   │   └── references/      # Usage analysis
 │   └── smalltalk-implementation-finder/
-│       ├── SKILL.md         # Implementation analysis
-│       ├── examples/        # Implementation scenarios
-│       └── references/      # Implementation analysis
-├── hooks/
-│   └── hooks.json           # PostToolUse hook configuration
-├── scripts/
-│   └── suggest-class-comment.py  # postToolUse hook (uv run python) for documentation suggestions
 ├── doc/
 │   └── Commands.md               # Commands quick reference
 ├── README.md                 # This file
@@ -320,7 +303,9 @@ MIT License - see LICENSE file for details
 ## Links
 
 - **MCP Servers**:
-  - [pharo-smalltalk-interop-mcp-server](https://github.com/mumez/pharo-smalltalk-interop-mcp-server) by mumez
+  - [smalltalk-interop-mcp-server](https://github.com/mumez/smalltalk-interop-mcp-server) by mumez
   - [smalltalk-validator-mcp-server](https://github.com/mumez/smalltalk-validator-mcp-server) by mumez
 - **Cursor**: [Cursor](https://cursor.com/)
 - **Pharo**: [Pharo Project](https://pharo.org/)
+- **Squeak**: [Squeak Project](https://squeak.org/)
+- **Upstream (Claude Code)**: [smalltalk-dev-plugin](https://github.com/mumez/smalltalk-dev-plugin) v2.2.0
